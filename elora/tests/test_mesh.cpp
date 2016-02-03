@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include <math/vector3d.hpp>
 #include <mesh/mesh.hpp>
+#include <mesh/primitives.hpp>
 #include <mesh/triangle.hpp>
 
 TEST_CASE("Triangle stores vertex indices") {
@@ -37,4 +38,43 @@ TEST_CASE("Mesh positions resolves a triangle") {
     REQUIRE(p[0] == elora::Vector3D{0, 0, 0});
     REQUIRE(p[1] == elora::Vector3D{1, 0, 0});
     REQUIRE(p[2] == elora::Vector3D{0, 1, 0});
+}
+
+TEST_CASE("make_cube has eight vertices and twelve triangles") {
+    const elora::Mesh cube = elora::make_cube();
+    REQUIRE(cube.vertices.size() == 8);
+    REQUIRE(cube.triangles.size() == 12);
+}
+
+TEST_CASE("make_cube triangles index the eight vertices") {
+    const elora::Mesh cube = elora::make_cube();
+    for (const auto& t : cube.triangles) {
+        REQUIRE(t.v0 < 8);
+        REQUIRE(t.v1 < 8);
+        REQUIRE(t.v2 < 8);
+    }
+}
+
+TEST_CASE("make_plane has two triangles") {
+    const elora::Mesh plane = elora::make_plane();
+    REQUIRE(plane.vertices.size() == 4);
+    REQUIRE(plane.triangles.size() == 2);
+}
+
+TEST_CASE("make_tetrahedron has four triangles") {
+    const elora::Mesh tet = elora::make_tetrahedron();
+    REQUIRE(tet.vertices.size() == 4);
+    REQUIRE(tet.triangles.size() == 4);
+}
+
+TEST_CASE("make_pyramid has six triangles") {
+    const elora::Mesh pyramid = elora::make_pyramid();
+    REQUIRE(pyramid.vertices.size() == 5);
+    REQUIRE(pyramid.triangles.size() == 6);
+}
+
+TEST_CASE("make_octahedron has eight triangles") {
+    const elora::Mesh octa = elora::make_octahedron();
+    REQUIRE(octa.vertices.size() == 6);
+    REQUIRE(octa.triangles.size() == 8);
 }
