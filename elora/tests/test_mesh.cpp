@@ -1,8 +1,13 @@
 #include <catch.hpp>
+#include <io/obj.hpp>
 #include <math/vector3d.hpp>
 #include <mesh/mesh.hpp>
 #include <mesh/primitives.hpp>
 #include <mesh/triangle.hpp>
+
+#include <cstdio>
+#include <fstream>
+#include <string>
 
 TEST_CASE("Triangle stores vertex indices") {
     const elora::Triangle t{1, 2, 3};
@@ -77,4 +82,30 @@ TEST_CASE("make_octahedron has eight triangles") {
     const elora::Mesh octa = elora::make_octahedron();
     REQUIRE(octa.vertices.size() == 6);
     REQUIRE(octa.triangles.size() == 8);
+}
+
+TEST_CASE("OBJ save and load round-trips a cube") {
+    const std::string path = "/tmp/elora_test_cube.obj";
+    REQUIRE(elora::save_obj(elora::make_cube(), path));
+    const auto loaded = elora::load_obj(path);
+    REQUIRE(loaded.has_value());
+    REQUIRE(loaded->vertices.size() == 8);
+    REQUIRE(loaded->triangles.size() == 12);
+    REQUIRE(loaded->vertices[0] == elora::Vector3D{-1, -1, -1});
+    std::remove(path.c_str());
+}
+
+TEST_CASE("OBJ loader triangulates quads and vt/vn indices") {
+    const std::string path = "/tmp/elora_test_quad.obj";
+    {
+        std::ofstream out(path);
+        out << "v 0 0 0\nv 1 0 0\nv 1 1 0\nv 0 1 0\n";
+        out << "f 1/1/1 2/2/2 3/3/3 4/4/4\n";
+    }
+    const auto loaded = elora::load_obj(path);
+    REQUIRE(loaded.has_value());
+    REQUIRE(loaded->triangles.size() == 2);
+    REQUIRE(loaded->triangles[0] == elora::Triangle{0, 1, 2});
+    REQUIRE(loaded->triangles[1] == elora::Triangle{0, 2, 3});
+    std::remove(path.c_str());
 }
