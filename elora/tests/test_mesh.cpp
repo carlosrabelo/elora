@@ -95,6 +95,26 @@ TEST_CASE("OBJ save and load round-trips a cube") {
     std::remove(path.c_str());
 }
 
+TEST_CASE("assets cube.obj loads") {
+    auto loaded = elora::load_obj("assets/cube.obj");
+    if (!loaded) {
+        loaded = elora::load_obj("../assets/cube.obj");
+    }
+    REQUIRE(loaded.has_value());
+    REQUIRE(loaded->vertices.size() == 8);
+    REQUIRE(loaded->triangles.size() == 12);
+}
+
+TEST_CASE("assets teapot.obj loads") {
+    auto loaded = elora::load_obj("assets/teapot.obj");
+    if (!loaded) {
+        loaded = elora::load_obj("../assets/teapot.obj");
+    }
+    REQUIRE(loaded.has_value());
+    REQUIRE(loaded->vertices.size() == 800);
+    REQUIRE(loaded->triangles.size() == 1024);
+}
+
 TEST_CASE("OBJ loader triangulates quads and vt/vn indices") {
     const std::string path = "/tmp/elora_test_quad.obj";
     {
