@@ -46,6 +46,17 @@ TEST_CASE("render hides a farther triangle behind a nearer one") {
     REQUIRE(engine.pixel(80, 60) == 0x00ff00);
 }
 
+TEST_CASE("update rasterizes the mesh then draws the FPS overlay") {
+    elora::Engine engine{"test", 640, 480, 4, 4};
+    engine.init();
+    const elora::Mesh cube = elora::make_cube();
+    const elora::Camera camera{{0, 0, 3}, {0, 0, 0}, {0, 1, 0}, 60.0f};
+    const std::uint32_t colors[] = {0xff0000};
+    elora::update(engine, cube, camera, 0, 0, 0, colors, elora::DrawMode::Solid, 0x000000);
+    REQUIRE(engine.pixel(80, 60) == 0xff0000);
+    REQUIRE(engine.pixel(4, 4) == 0xf0f0f0);
+}
+
 TEST_CASE("render wireframe leaves the interior of a cube unfilled") {
     elora::Engine engine{"test", 640, 480, 4, 4};
     engine.init();

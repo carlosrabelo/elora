@@ -130,3 +130,35 @@ TEST_CASE("Engine keys start up") {
     REQUIRE_FALSE(engine.is_key_down(elora::Key::T));
     REQUIRE_FALSE(engine.is_key_down(elora::Key::P));
 }
+
+TEST_CASE("Engine delta_time and fps start at zero") {
+    elora::Engine engine{"test", 640, 480, 4, 4};
+    engine.init();
+    REQUIRE(engine.delta_time() == 0.0f);
+    REQUIRE(engine.fps() == 0.0f);
+}
+
+TEST_CASE("Engine draw_text writes a digit into the framebuffer") {
+    elora::Engine engine{"test", 640, 480, 4, 4};
+    engine.init();
+    engine.draw_text(0, 0, "1", 0xffffff);
+    REQUIRE(engine.pixel(2, 0) == 0xffffff);
+    REQUIRE(engine.pixel(2, 6) == 0xffffff);
+    REQUIRE(engine.pixel(0, 0) == 0);
+}
+
+TEST_CASE("Engine draw_text scales glyphs") {
+    elora::Engine engine{"test", 640, 480, 4, 4};
+    engine.init();
+    engine.draw_text(0, 0, "1", 0x00ff00, 2);
+    REQUIRE(engine.pixel(4, 0) == 0x00ff00);
+    REQUIRE(engine.pixel(5, 1) == 0x00ff00);
+}
+
+TEST_CASE("Engine draw_text ignores null and non-positive scale") {
+    elora::Engine engine{"test", 640, 480, 4, 4};
+    engine.init();
+    engine.draw_text(0, 0, nullptr, 0xffffff);
+    engine.draw_text(0, 0, "1", 0xffffff, 0);
+    REQUIRE(engine.pixel(2, 0) == 0);
+}

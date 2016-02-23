@@ -6,7 +6,6 @@
 #include <mesh/mesh.hpp>
 #include <render/renderer.hpp>
 
-#include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -31,7 +30,7 @@ int main() {
     }
     const elora::Mesh mesh = *loaded;
 
-    elora::Engine engine{"3D Demo", 1024, 768, 2, 2};
+    elora::Engine engine{"3D Demo", 1024, 768, 3, 3};
     engine.init();
 
     const elora::Vector3D camera_start{1.8f, 1.4f, 3.0f};
@@ -51,12 +50,9 @@ int main() {
     bool p_was_down = false;
     bool wireframe = false;
     bool auto_rotate = true;
-    auto last = std::chrono::steady_clock::now();
 
     const bool ok = engine.run([&] {
-        const auto now = std::chrono::steady_clock::now();
-        const float dt = std::chrono::duration<float>(now - last).count();
-        last = now;
+        const float dt = engine.delta_time();
         const bool space_down = engine.is_key_down(elora::Key::Space);
         if (space_down && !space_was_down) {
             camera.set_position(camera_start);
@@ -109,7 +105,7 @@ int main() {
         }
 
         const auto mode = wireframe ? elora::DrawMode::Wireframe : elora::DrawMode::Solid;
-        elora::render(engine, mesh, camera, angle_x, angle_y, angle_z, face_colors, mode);
+        elora::update(engine, mesh, camera, angle_x, angle_y, angle_z, face_colors, mode);
     });
 
     engine.shutdown();

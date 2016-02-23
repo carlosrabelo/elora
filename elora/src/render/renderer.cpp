@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdio>
 #include <limits>
 #include <vector>
 
@@ -139,6 +140,16 @@ void render(Engine& engine, const Mesh& mesh, const Camera& camera, float angle_
             stroke_triangle(engine, depth, bw, bh, triangle, stroke_color);
         }
     }
+}
+
+void update(Engine& engine, const Mesh& mesh, const Camera& camera, float angle_x, float angle_y,
+            float angle_z, Span<const std::uint32_t> face_colors, DrawMode mode,
+            std::uint32_t clear_color, std::uint32_t stroke_color) {
+    render(engine, mesh, camera, angle_x, angle_y, angle_z, face_colors, mode, clear_color, stroke_color);
+
+    char fps_text[16];
+    std::snprintf(fps_text, sizeof(fps_text), "FPS %d", static_cast<int>(engine.fps() + 0.5f));
+    engine.draw_text(4, 4, fps_text, 0xf0f0f0, 2);
 }
 
 }  // namespace elora

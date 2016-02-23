@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -50,8 +51,14 @@ public:
     void draw_line(int x0, int y0, int x1, int y1, std::uint32_t color);
     void fill_triangle(int x0, int y0, int x1, int y1, int x2, int y2, std::uint32_t color);
     void stroke_triangle(int x0, int y0, int x1, int y1, int x2, int y2, std::uint32_t color);
+    void draw_text(int x, int y, const char* text, std::uint32_t color, int scale = 1);
     std::uint32_t pixel(int x, int y) const;
     void present();
+
+    // Wall time since the previous frame start. No sleep or frame cap.
+    // Clamped so a hitch does not fling the camera or mesh.
+    float delta_time() const;
+    float fps() const;
 
     const std::string& app_name() const;
     int width() const;
@@ -81,6 +88,9 @@ private:
     std::vector<std::uint32_t> back_buffer_;
     std::unique_ptr<Graphics> graphics_;
     std::array<bool, static_cast<std::size_t>(Key::Count)> keys_{};
+    std::chrono::steady_clock::time_point last_tick_{};
+    float dt_{0};
+    float fps_{0};
 };
 
 }  // namespace elora

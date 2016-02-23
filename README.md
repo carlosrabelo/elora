@@ -7,13 +7,14 @@ C++14 CPU 3D engine — draws to a back buffer, then presents to an X11 window.
 - Start and shut down `elora::Engine`
 - Application supplies its name, window size, and pixel size (the bundled demo uses 3D Demo at 1024x768)
 - Window title includes the resolution, e.g. `3D Demo 1024x768`
-- Draw to a CPU back buffer (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`); `present()` copies the scaled buffer to the X11 window
-- `elora::render` clears the back buffer, hides occluded triangles with a depth buffer, and rasterizes solid or wireframe
+- Draw to a CPU back buffer (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`, `draw_text`); `present()` copies the scaled buffer to the X11 window
+- `Engine::delta_time()` and `Engine::fps()` come from the wall clock between frames (no sleep or FPS cap); camera motion and mesh rotation scale by `dt`
+- `elora::update` composes a frame in the back buffer (depth-buffered mesh plus HUD); `present()` is the only copy to the X11 window
 - `elora::Vector3D` for positions and directions, with rotations about X, Y, and Z
 - `elora::Camera` look-at perspective projection (position, target, FOV)
 - `elora::Triangle` (indexed) and `elora::Mesh` (vertices plus triangles)
 - Load and save Wavefront `.obj` meshes (`assets/cube.obj`, plane, pyramid, tetrahedron, octahedron, teapot)
-- Bundled demo loads `assets/teapot.obj` and spins it; move the camera with WASD (Z/X), R/F (Y), or arrow keys; **T** toggles wireframe; **P** toggles auto-rotation
+- Bundled demo loads `assets/teapot.obj` and spins it; move the camera with WASD (Z/X), R/F (Y), or arrow keys; **T** toggles wireframe; **P** toggles auto-rotation; an FPS readout sits on the back buffer
 - Build with g++ (C++14) through a Makefile workflow
 - Catch2 tests for the engine lifecycle and drawing
 

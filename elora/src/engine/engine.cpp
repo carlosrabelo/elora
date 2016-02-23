@@ -8,7 +8,6 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
-#include <thread>
 #include <utility>
 
 namespace elora {
@@ -38,6 +37,8 @@ void Engine::init() {
     const int bh = buffer_height();
     const auto count = static_cast<std::size_t>(bw) * static_cast<std::size_t>(bh);
     back_buffer_.assign(count, 0);
+    dt_ = 0;
+    fps_ = 0;
     initialized_ = true;
 }
 
@@ -74,22 +75,27 @@ bool Engine::run(std::function<void()> on_frame) {
     }
 
     using clock = std::chrono::steady_clock;
-    constexpr auto frame_time = std::chrono::milliseconds(16);
-    auto next_frame = clock::now();
+    constexpr float max_dt = 0.1f;
+    last_tick_ = clock::now();
+    dt_ = 0;
+    fps_ = 0;
     while (running_) {
         process_events(false);
         if (!running_) {
             break;
         }
+        const auto now = clock::now();
+        dt_ = std::chrono::duration<float>(now - last_tick_).count();
+        if (dt_ > max_dt) {
+            dt_ = max_dt;
+        }
+        last_tick_ = now;
+        if (dt_ > 0.0f) {
+            const float instant = 1.0f / dt_;
+            fps_ = (fps_ <= 0.0f) ? instant : (fps_ * 0.9f + instant * 0.1f);
+        }
         on_frame();
         present();
-        next_frame += frame_time;
-        const auto now = clock::now();
-        if (now < next_frame) {
-            std::this_thread::sleep_until(next_frame);
-        } else {
-            next_frame = now;
-        }
     }
     return true;
 }
@@ -134,6 +140,79 @@ void Engine::stroke_triangle(int x0, int y0, int x1, int y1, int x2, int y2, std
     draw_line(x0, y0, x1, y1, color);
     draw_line(x1, y1, x2, y2, color);
     draw_line(x2, y2, x0, y0, color);
+}
+
+namespace {
+
+// 5x7 glyphs; bit 4 is the leftmost column.
+const std::uint8_t kFontDigit[10][7] = {
+    {0x0E, 0x11, 0x13, 0x15, 0x19, 0x11, 0x0E},
+    {0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E},
+    {0x0E, 0x11, 0x01, 0x06, 0x08, 0x10, 0x1F},
+    {0x0E, 0x11, 0x01, 0x06, 0x01, 0x11, 0x0E},
+    {0x02, 0x06, 0x0A, 0x12, 0x1F, 0x02, 0x02},
+    {0x1F, 0x10, 0x1E, 0x01, 0x01, 0x11, 0x0E},
+    {0x06, 0x08, 0x10, 0x1E, 0x11, 0x11, 0x0E},
+    {0x1F, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08},
+    {0x0E, 0x11, 0x11, 0x0E, 0x11, 0x11, 0x0E},
+    {0x0E, 0x11, 0x11, 0x0F, 0x01, 0x02, 0x0C},
+};
+const std::uint8_t kFontF[7] = {0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x10};
+const std::uint8_t kFontP[7] = {0x1E, 0x11, 0x11, 0x1E, 0x10, 0x10, 0x10};
+const std::uint8_t kFontS[7] = {0x0E, 0x11, 0x10, 0x0E, 0x01, 0x11, 0x0E};
+
+const std::uint8_t* glyph_rows(char c) {
+    if (c >= '0' && c <= '9') {
+        return kFontDigit[c - '0'];
+    }
+    if (c == 'F' || c == 'f') {
+        return kFontF;
+    }
+    if (c == 'P' || c == 'p') {
+        return kFontP;
+    }
+    if (c == 'S' || c == 's') {
+        return kFontS;
+    }
+    return nullptr;
+}
+
+}  // namespace
+
+void Engine::draw_text(int x, int y, const char* text, std::uint32_t color, int scale) {
+    if (text == nullptr || scale < 1) {
+        return;
+    }
+    int cursor = x;
+    for (const char* p = text; *p != '\0'; ++p) {
+        const std::uint8_t* rows = glyph_rows(*p);
+        if (rows != nullptr) {
+            for (int row = 0; row < 7; ++row) {
+                const std::uint8_t bits = rows[row];
+                for (int col = 0; col < 5; ++col) {
+                    if ((bits & (0x10 >> col)) == 0) {
+                        continue;
+                    }
+                    const int px = cursor + col * scale;
+                    const int py = y + row * scale;
+                    for (int sy = 0; sy < scale; ++sy) {
+                        for (int sx = 0; sx < scale; ++sx) {
+                            put_pixel(px + sx, py + sy, color);
+                        }
+                    }
+                }
+            }
+        }
+        cursor += 6 * scale;
+    }
+}
+
+float Engine::delta_time() const {
+    return dt_;
+}
+
+float Engine::fps() const {
+    return fps_;
 }
 
 namespace {

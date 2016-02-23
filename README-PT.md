@@ -7,13 +7,14 @@ Engine 3D em C++14 na CPU — desenha num back buffer e só então apresenta num
 - Inicia e encerra `elora::Engine`
 - A aplicação informa o nome, o tamanho da janela e o tamanho do pixel (o demo incluso usa 3D Demo em 1024x768)
 - O título da janela inclui a resolução, por exemplo `3D Demo 1024x768`
-- Desenha num back buffer na CPU (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`); `present()` copia o buffer escalado para a janela X11
-- `elora::render` limpa o back buffer, esconde triângulos oclusos com um buffer de profundidade e rasteriza sólido ou wireframe
+- Desenha num back buffer na CPU (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`, `draw_text`); `present()` copia o buffer escalado para a janela X11
+- `Engine::delta_time()` e `Engine::fps()` vêm do tempo real entre frames (sem sleep nem teto de FPS); o movimento da câmera e a rotação da malha usam `dt`
+- `elora::update` monta o quadro no back buffer (malha com profundidade e HUD); `present()` é a única cópia para a janela X11
 - `elora::Vector3D` para posições e direções, com rotações em X, Y e Z
 - `elora::Camera` com projeção perspectiva look-at (posição, alvo, FOV)
 - `elora::Triangle` (indexado) e `elora::Mesh` (vértices e triângulos)
 - Carrega e grava meshes Wavefront `.obj` (`assets/cube.obj`, plano, pirâmide, tetraedro, octaedro, bule)
-- O demo incluso carrega `assets/teapot.obj` e gira; mova a câmera com WASD (Z/X), R/F (Y) ou as setas; **T** alterna o wireframe; **P** liga e desliga a auto-rotação
+- O demo incluso carrega `assets/teapot.obj` e gira; mova a câmera com WASD (Z/X), R/F (Y) ou as setas; **T** alterna o wireframe; **P** liga e desliga a auto-rotação; o FPS aparece no back buffer
 - Compila com g++ (C++14) por meio de um fluxo Makefile
 - Testes Catch2 para o ciclo de vida da engine e o desenho
 
