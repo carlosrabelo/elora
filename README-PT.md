@@ -9,12 +9,12 @@ Engine 3D em C++14 na CPU — desenha num back buffer e só então apresenta num
 - O título da janela inclui a resolução, por exemplo `3D Demo 1024x768`
 - Desenha num back buffer na CPU (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`, `draw_text`); `present()` copia o buffer escalado para a janela X11
 - `Engine::delta_time()` e `Engine::fps()` vêm do tempo real entre frames (sem sleep nem teto de FPS); o movimento da câmera e a rotação da malha usam `dt`
-- `elora::update` monta o quadro no back buffer (malha com profundidade e HUD); `present()` é a única cópia para a janela X11
+- `elora::update` monta o quadro no back buffer (malha com profundidade, iluminação Lambert e HUD); `present()` é a única cópia para a janela X11
 - `elora::Vector3D` para posições e direções, com rotações em X, Y e Z
 - `elora::Camera` com projeção perspectiva look-at (posição, alvo, FOV)
 - `elora::Triangle` (indexado) e `elora::Mesh` (vértices e triângulos)
 - Carrega e grava meshes Wavefront `.obj` (`assets/cube.obj`, plano, pirâmide, tetraedro, octaedro, bule)
-- O demo incluso carrega `assets/teapot.obj` e gira; mova a câmera com WASD (Z/X), R/F (Y) ou as setas; **T** alterna o wireframe; **P** liga e desliga a auto-rotação; o FPS aparece no back buffer
+- O demo incluso carrega `assets/teapot.obj` e gira numa cor só; mova a câmera com WASD (Z/X), R/F (Y) ou as setas; **T** alterna o wireframe; **C** alterna a paleta por face; **P** liga e desliga a auto-rotação; o FPS aparece no back buffer
 - Compila com g++ (C++14) por meio de um fluxo Makefile
 - Testes Catch2 para o ciclo de vida da engine e o desenho
 
@@ -43,7 +43,7 @@ make build
 ./bin/elora
 ```
 
-Abre uma janela com o título `3D Demo 1024x768` e gira o bule carregado de `assets/teapot.obj`. Mova a câmera: **A/D** ou setas no X, **R/F** no Y, **W/S** ou setas no Z. **T** alterna o wireframe. **P** pausa ou retoma a auto-rotação. **Espaço** restaura a câmera e a rotação. Feche com Escape, `q` ou pelo gerenciador de janelas.
+Abre uma janela com o título `3D Demo 1024x768` e gira o bule carregado de `assets/teapot.obj`. Mova a câmera: **A/D** ou setas no X, **R/F** no Y, **W/S** ou setas no Z. **T** alterna o wireframe. **C** alterna cores por face (o padrão é uma cor só). **P** pausa ou retoma a auto-rotação. **Espaço** restaura a câmera e a rotação. Feche com Escape, `q` ou pelo gerenciador de janelas.
 
 ## Estrutura do Projeto
 

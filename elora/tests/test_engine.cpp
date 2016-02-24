@@ -129,6 +129,7 @@ TEST_CASE("Engine keys start up") {
     REQUIRE_FALSE(engine.is_key_down(elora::Key::A));
     REQUIRE_FALSE(engine.is_key_down(elora::Key::T));
     REQUIRE_FALSE(engine.is_key_down(elora::Key::P));
+    REQUIRE_FALSE(engine.is_key_down(elora::Key::C));
 }
 
 TEST_CASE("Engine delta_time and fps start at zero") {

@@ -9,12 +9,12 @@ C++14 CPU 3D engine — draws to a back buffer, then presents to an X11 window.
 - Window title includes the resolution, e.g. `3D Demo 1024x768`
 - Draw to a CPU back buffer (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`, `draw_text`); `present()` copies the scaled buffer to the X11 window
 - `Engine::delta_time()` and `Engine::fps()` come from the wall clock between frames (no sleep or FPS cap); camera motion and mesh rotation scale by `dt`
-- `elora::update` composes a frame in the back buffer (depth-buffered mesh plus HUD); `present()` is the only copy to the X11 window
+- `elora::update` composes a frame in the back buffer (depth-buffered mesh, Lambert lighting, and HUD); `present()` is the only copy to the X11 window
 - `elora::Vector3D` for positions and directions, with rotations about X, Y, and Z
 - `elora::Camera` look-at perspective projection (position, target, FOV)
 - `elora::Triangle` (indexed) and `elora::Mesh` (vertices plus triangles)
 - Load and save Wavefront `.obj` meshes (`assets/cube.obj`, plane, pyramid, tetrahedron, octahedron, teapot)
-- Bundled demo loads `assets/teapot.obj` and spins it; move the camera with WASD (Z/X), R/F (Y), or arrow keys; **T** toggles wireframe; **P** toggles auto-rotation; an FPS readout sits on the back buffer
+- Bundled demo loads `assets/teapot.obj` and spins it in one color; move the camera with WASD (Z/X), R/F (Y), or arrow keys; **T** toggles wireframe; **C** toggles a per-face palette; **P** toggles auto-rotation; an FPS readout sits on the back buffer
 - Build with g++ (C++14) through a Makefile workflow
 - Catch2 tests for the engine lifecycle and drawing
 
@@ -43,7 +43,7 @@ make build
 ./bin/elora
 ```
 
-Opens a window titled `3D Demo 1024x768` and spins the teapot loaded from `assets/teapot.obj`. Move the camera: **A/D** or arrows X, **R/F** Y, **W/S** or arrows Z. **T** toggles wireframe. **P** pauses or resumes auto-rotation. **Space** resets the camera and rotation. Close with Escape, `q`, or the window manager.
+Opens a window titled `3D Demo 1024x768` and spins the teapot loaded from `assets/teapot.obj`. Move the camera: **A/D** or arrows X, **R/F** Y, **W/S** or arrows Z. **T** toggles wireframe. **C** toggles per-face colors (default is one color). **P** pauses or resumes auto-rotation. **Space** resets the camera and rotation. Close with Escape, `q`, or the window manager.
 
 ## Project Layout
 

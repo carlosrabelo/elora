@@ -1,4 +1,5 @@
 #include <core/optional.hpp>
+#include <core/span.hpp>
 #include <engine/engine.hpp>
 #include <io/obj.hpp>
 #include <math/camera.hpp>
@@ -37,6 +38,7 @@ int main() {
     const elora::Vector3D camera_target{0, 0, 0};
     constexpr float camera_fov = 55.0f;
     elora::Camera camera{camera_start, camera_target, {0, 1, 0}, camera_fov};
+    constexpr std::uint32_t mesh_color[] = {0xc8a070};
     constexpr std::uint32_t face_colors[] = {0xe07070, 0x70a070, 0x7070e0, 0xd0c060, 0x60c0c0, 0xc070b0};
     constexpr float speed_x = 0.7f;
     constexpr float speed_y = 0.9f;
@@ -48,8 +50,10 @@ int main() {
     bool space_was_down = false;
     bool t_was_down = false;
     bool p_was_down = false;
+    bool c_was_down = false;
     bool wireframe = false;
     bool auto_rotate = true;
+    bool face_palette = false;
 
     const bool ok = engine.run([&] {
         const float dt = engine.delta_time();
@@ -80,6 +84,12 @@ int main() {
         }
         p_was_down = p_down;
 
+        const bool c_down = engine.is_key_down(elora::Key::C);
+        if (c_down && !c_was_down) {
+            face_palette = !face_palette;
+        }
+        c_was_down = c_down;
+
         elora::Vector3D pos = camera.position();
         constexpr float camera_speed = 2.0f;
         if (engine.is_key_down(elora::Key::A) || engine.is_key_down(elora::Key::Left)) {
@@ -105,7 +115,10 @@ int main() {
         }
 
         const auto mode = wireframe ? elora::DrawMode::Wireframe : elora::DrawMode::Solid;
-        elora::update(engine, mesh, camera, angle_x, angle_y, angle_z, face_colors, mode);
+        const elora::Span<const std::uint32_t> colors =
+            face_palette ? elora::Span<const std::uint32_t>(face_colors)
+                         : elora::Span<const std::uint32_t>(mesh_color);
+        elora::update(engine, mesh, camera, angle_x, angle_y, angle_z, colors, mode);
     });
 
     engine.shutdown();

@@ -103,11 +103,39 @@ void stroke_triangle(Engine& engine, const std::vector<float>& depth, int bw, in
     stroke_line(engine, depth, bw, bh, triangle.v2, triangle.v0, color);
 }
 
+std::uint32_t shade_color(std::uint32_t color, float intensity) {
+    if (intensity < 0.0f) {
+        intensity = 0.0f;
+    }
+    if (intensity > 1.0f) {
+        intensity = 1.0f;
+    }
+    const unsigned r = (color >> 16) & 0xffu;
+    const unsigned g = (color >> 8) & 0xffu;
+    const unsigned b = color & 0xffu;
+    const auto channel = [intensity](unsigned value) {
+        return static_cast<unsigned>(static_cast<float>(value) * intensity + 0.5f);
+    };
+    return (channel(r) << 16) | (channel(g) << 8) | channel(b);
+}
+
+float lambert(const Vector3D& normal, const Light& light) {
+    Vector3D direction = light.direction.normalized();
+    if (direction.length_squared() == 0.0f) {
+        direction = {0, 0, 1};
+    }
+    float ndotl = normal.dot(direction);
+    if (ndotl < 0.0f) {
+        ndotl = 0.0f;
+    }
+    return light.ambient + light.diffuse * ndotl;
+}
+
 }  // namespace
 
 void render(Engine& engine, const Mesh& mesh, const Camera& camera, float angle_x, float angle_y,
             float angle_z, Span<const std::uint32_t> face_colors, DrawMode mode,
-            std::uint32_t clear_color, std::uint32_t stroke_color) {
+            std::uint32_t clear_color, std::uint32_t stroke_color, const Light& light) {
     engine.clear(clear_color);
     const int bw = engine.buffer_width();
     const int bh = engine.buffer_height();
@@ -129,7 +157,11 @@ void render(Engine& engine, const Mesh& mesh, const Camera& camera, float angle_
         if (!screen) {
             continue;
         }
-        const std::uint32_t color = write_color ? face_colors[i % face_colors.size()] : 0;
+        std::uint32_t color = write_color ? face_colors[i % face_colors.size()] : 0;
+        if (write_color) {
+            const Vector3D normal = rotated_face_normal(mesh, mesh.triangles[i], angle_x, angle_y, angle_z);
+            color = shade_color(color, lambert(normal, light));
+        }
         fill_triangle(engine, depth, bw, bh, *screen, color, write_color);
         if (mode == DrawMode::Wireframe) {
             visible.push_back(*screen);
@@ -144,8 +176,9 @@ void render(Engine& engine, const Mesh& mesh, const Camera& camera, float angle_
 
 void update(Engine& engine, const Mesh& mesh, const Camera& camera, float angle_x, float angle_y,
             float angle_z, Span<const std::uint32_t> face_colors, DrawMode mode,
-            std::uint32_t clear_color, std::uint32_t stroke_color) {
-    render(engine, mesh, camera, angle_x, angle_y, angle_z, face_colors, mode, clear_color, stroke_color);
+            std::uint32_t clear_color, std::uint32_t stroke_color, const Light& light) {
+    render(engine, mesh, camera, angle_x, angle_y, angle_z, face_colors, mode, clear_color, stroke_color,
+           light);
 
     char fps_text[16];
     std::snprintf(fps_text, sizeof(fps_text), "FPS %d", static_cast<int>(engine.fps() + 0.5f));

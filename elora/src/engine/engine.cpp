@@ -450,6 +450,10 @@ void Engine::process_events(bool block) {
         case XK_P:
             keys_[static_cast<std::size_t>(Key::P)] = down;
             break;
+        case XK_c:
+        case XK_C:
+            keys_[static_cast<std::size_t>(Key::C)] = down;
+            break;
         case XK_Left:
             keys_[static_cast<std::size_t>(Key::Left)] = down;
             break;

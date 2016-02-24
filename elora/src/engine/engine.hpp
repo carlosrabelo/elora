@@ -20,6 +20,7 @@ enum class Key {
     S,
     T,
     P,
+    C,
     Left,
     Right,
     Up,

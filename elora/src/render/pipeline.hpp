@@ -47,6 +47,15 @@ inline Optional<ScreenTriangle> project_triangle(const Vector3D& p0, const Vecto
     return screen;
 }
 
+inline Vector3D rotated_face_normal(const Mesh& mesh, const Triangle& triangle, float angle_x,
+                                   float angle_y, float angle_z) {
+    const auto p = mesh.positions(triangle);
+    const Vector3D p0 = p[0].rotated(angle_x, angle_y, angle_z);
+    const Vector3D p1 = p[1].rotated(angle_x, angle_y, angle_z);
+    const Vector3D p2 = p[2].rotated(angle_x, angle_y, angle_z);
+    return (p1 - p0).cross(p2 - p0).normalized();
+}
+
 inline Optional<ScreenTriangle> transform_and_project(const Mesh& mesh, const Triangle& triangle,
                                                            float angle_x, float angle_y, float angle_z,
                                                            const Camera& camera, int buffer_width,

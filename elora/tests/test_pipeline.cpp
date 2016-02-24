@@ -12,6 +12,14 @@ TEST_CASE("screen_area is negative for counter-clockwise screen winding") {
     REQUIRE(elora::screen_area(0, 0, 0, 10, 10, 0) == -100);
 }
 
+TEST_CASE("rotated_face_normal of the cube +Z face points forward") {
+    const elora::Mesh cube = elora::make_cube();
+    const elora::Vector3D n = elora::rotated_face_normal(cube, cube.triangles[0], 0, 0, 0);
+    REQUIRE(n.x == Approx(0).margin(0.0001f));
+    REQUIRE(n.y == Approx(0).margin(0.0001f));
+    REQUIRE(n.z == Approx(1).margin(0.0001f));
+}
+
 TEST_CASE("project_triangle keeps a front-facing cube face") {
     const elora::Mesh cube = elora::make_cube();
     const elora::Camera camera{{0, 0, 3}, {0, 0, 0}, {0, 1, 0}, 60.0f};
