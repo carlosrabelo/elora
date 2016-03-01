@@ -50,7 +50,7 @@ Opens a window titled `3D Demo 1024x768` and spins the teapot loaded from `asset
 ```
 elora/               # C++ component (sources, tests, Makefile)
   src/core/          # Optional, Span
-  src/engine/        # window, back buffer, input
+  src/engine/        # Engine facade, keys, canvas, X11 window
   src/math/          # Vector3D, Camera
   src/mesh/          # Triangle, Mesh, primitives
   src/render/        # pipeline and mesh rasterizer

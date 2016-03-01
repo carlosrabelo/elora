@@ -50,7 +50,7 @@ Abre uma janela com o título `3D Demo 1024x768` e gira o bule carregado de `ass
 ```
 elora/               # componente C++ (fontes, testes, Makefile)
   src/core/          # Optional, Span
-  src/engine/        # janela, back buffer, entrada
+  src/engine/        # fachada Engine, teclas, canvas, janela X11
   src/math/          # Vector3D, Camera
   src/mesh/          # Triangle, Mesh, primitivas
   src/render/        # pipeline e rasterizador de malha

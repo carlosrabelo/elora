@@ -1,5 +1,7 @@
 #pragma once
 
+#include <engine/keys.hpp>
+
 #include <array>
 #include <chrono>
 #include <cstddef>
@@ -10,25 +12,6 @@
 #include <vector>
 
 namespace elora {
-
-enum class Key {
-    A,
-    D,
-    R,
-    F,
-    W,
-    S,
-    T,
-    P,
-    C,
-    Left,
-    Right,
-    Up,
-    Down,
-    Escape,
-    Space,
-    Count
-};
 
 class Engine {
 public:
