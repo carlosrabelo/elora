@@ -4,6 +4,7 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -22,12 +23,8 @@ struct Engine::Graphics {
     ::Atom wm_delete = 0;
 };
 
-Engine::Engine(std::string app_name, int width, int height, int pixel_width, int pixel_height)
-    : app_name_(std::move(app_name)),
-      width_(width),
-      height_(height),
-      pixel_width_(pixel_width),
-      pixel_height_(pixel_height) {}
+Engine::Engine(std::string app_name, int width, int height)
+    : app_name_(std::move(app_name)), width_(width), height_(height) {}
 
 Engine::~Engine() {
     shutdown();
@@ -47,27 +44,11 @@ void Engine::present() {
         return;
     }
 
-    const int bw = buffer_width();
-    const int bh = buffer_height();
-    auto* dst = graphics_->display_buffer.data();
-    for (int y = 0; y < bh; ++y) {
-        for (int x = 0; x < bw; ++x) {
-            const std::uint32_t color =
-                back_buffer_[static_cast<std::size_t>(y) * static_cast<std::size_t>(bw) +
-                             static_cast<std::size_t>(x)];
-            for (int py = 0; py < pixel_height_; ++py) {
-                const int dy = y * pixel_height_ + py;
-                auto* row = dst + static_cast<std::size_t>(dy) * static_cast<std::size_t>(width_);
-                for (int px = 0; px < pixel_width_; ++px) {
-                    row[x * pixel_width_ + px] = color;
-                }
-            }
-        }
-    }
+    std::copy(back_buffer_.begin(), back_buffer_.end(), graphics_->display_buffer.begin());
 
     XPutImage(graphics_->display, graphics_->window, graphics_->gc, graphics_->image, 0, 0, 0, 0,
               static_cast<unsigned int>(width_), static_cast<unsigned int>(height_));
-    XFlush(graphics_->display);
+    XSync(graphics_->display, False);
 }
 
 bool Engine::open_window() {
@@ -86,13 +67,13 @@ bool Engine::open_window() {
     ::Window root = RootWindow(graphics_->display, screen);
 
     XSetWindowAttributes attrs{};
-    attrs.background_pixel = BlackPixel(graphics_->display, screen);
-    attrs.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask | FocusChangeMask;
+    attrs.background_pixmap = None;
+    attrs.event_mask = KeyPressMask | KeyReleaseMask | StructureNotifyMask | FocusChangeMask;
 
     graphics_->window = XCreateWindow(graphics_->display, root, 0, 0, static_cast<unsigned int>(width_),
                                       static_cast<unsigned int>(height_), 0, DefaultDepth(graphics_->display, screen),
                                       InputOutput, DefaultVisual(graphics_->display, screen),
-                                      CWBackPixel | CWEventMask, &attrs);
+                                      CWBackPixmap | CWEventMask, &attrs);
 
     XSizeHints hints{};
     hints.flags = PMinSize | PMaxSize | PBaseSize;
@@ -226,11 +207,6 @@ void Engine::process_events(bool block) {
 
     auto handle = [this, &apply_key](XEvent& event) {
         switch (event.type) {
-        case Expose:
-            if (event.xexpose.count == 0) {
-                present();
-            }
-            break;
         case ClientMessage:
             if (static_cast<Atom>(event.xclient.data.l[0]) == graphics_->wm_delete) {
                 running_ = false;

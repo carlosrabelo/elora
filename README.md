@@ -5,9 +5,9 @@ C++14 CPU 3D engine — draws to a back buffer, then presents to an X11 window.
 ## Highlights
 
 - Start and shut down `elora::Engine`
-- Application supplies its name, window size, and pixel size (the bundled demo uses 3D Demo at 1024x768)
+- Application supplies its name and window size (the bundled demo uses 3D Demo at 1024x768)
 - Window title includes the resolution, e.g. `3D Demo 1024x768`
-- Draw to a CPU back buffer (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`, `draw_text`); `present()` copies the scaled buffer to the X11 window
+- Draw to a CPU back buffer (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`, `draw_text`); `present()` copies the buffer 1:1 to the X11 window
 - `Engine::delta_time()` and `Engine::fps()` come from the wall clock between frames (no sleep or FPS cap); camera motion and mesh rotation scale by `dt`
 - `elora::update` composes a frame in the back buffer (depth-buffered mesh, Lambert lighting, and HUD); `present()` is the only copy to the X11 window
 - `elora::Vector3D` for positions and directions, with rotations about X, Y, and Z

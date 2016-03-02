@@ -31,7 +31,7 @@ int main() {
     }
     const elora::Mesh mesh = *loaded;
 
-    elora::Engine engine{"3D Demo", 1024, 768, 3, 3};
+    elora::Engine engine{"3D Demo", 1024, 768};
     engine.init();
 
     const elora::Vector3D camera_start{1.8f, 1.4f, 3.0f};

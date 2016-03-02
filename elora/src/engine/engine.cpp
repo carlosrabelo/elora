@@ -6,9 +6,7 @@
 namespace elora {
 
 void Engine::init() {
-    const int bw = buffer_width();
-    const int bh = buffer_height();
-    const auto count = static_cast<std::size_t>(bw) * static_cast<std::size_t>(bh);
+    const auto count = static_cast<std::size_t>(width_) * static_cast<std::size_t>(height_);
     back_buffer_.assign(count, 0);
     dt_ = 0;
     fps_ = 0;
@@ -93,20 +91,12 @@ int Engine::height() const {
     return height_;
 }
 
-int Engine::pixel_width() const {
-    return pixel_width_;
-}
-
-int Engine::pixel_height() const {
-    return pixel_height_;
-}
-
 int Engine::buffer_width() const {
-    return width_ / pixel_width_;
+    return width_;
 }
 
 int Engine::buffer_height() const {
-    return height_ / pixel_height_;
+    return height_;
 }
 
 std::string Engine::title() const {

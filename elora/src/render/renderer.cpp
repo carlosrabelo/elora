@@ -47,7 +47,7 @@ void fill_triangle(Engine& engine, std::vector<float>& depth, int bw, int bh, co
                              static_cast<float>(w2) * triangle.v2.z) *
                             inv_area;
             const auto index = pixel_index(x, y, bw);
-            if (z >= depth[index]) {
+            if (z > depth[index] + 1.0e-3f) {
                 continue;
             }
             depth[index] = z;

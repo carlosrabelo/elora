@@ -20,6 +20,10 @@ inline int screen_area(int x0, int y0, int x1, int y1, int x2, int y2) {
     return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
 }
 
+inline float screen_area(float x0, float y0, float x1, float y1, float x2, float y2) {
+    return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+}
+
 inline bool is_off_screen(const ScreenTriangle& triangle, int buffer_width, int buffer_height) {
     const int min_x = std::min(triangle.v0.x, std::min(triangle.v1.x, triangle.v2.x));
     const int max_x = std::max(triangle.v0.x, std::max(triangle.v1.x, triangle.v2.x));
@@ -37,7 +41,7 @@ inline Optional<ScreenTriangle> project_triangle(const Vector3D& p0, const Vecto
     if (!s0 || !s1 || !s2) {
         return {};
     }
-    if (screen_area(s0->x, s0->y, s1->x, s1->y, s2->x, s2->y) > 0) {
+    if (screen_area(s0->sx, s0->sy, s1->sx, s1->sy, s2->sx, s2->sy) > 1.0e-3f) {
         return {};
     }
     const ScreenTriangle screen{*s0, *s1, *s2};

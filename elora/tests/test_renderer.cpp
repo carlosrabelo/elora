@@ -11,7 +11,7 @@ const elora::Light kUnlit{{0, 0, 1}, 1.0f, 0.0f};
 }
 
 TEST_CASE("render clears and rasterizes a visible cube") {
-    elora::Engine engine{"test", 640, 480, 4, 4};
+    elora::Engine engine{"test", 160, 120};
     engine.init();
     const elora::Mesh cube = elora::make_cube();
     const elora::Camera camera{{0, 0, 3}, {0, 0, 0}, {0, 1, 0}, 60.0f};
@@ -22,7 +22,7 @@ TEST_CASE("render clears and rasterizes a visible cube") {
 }
 
 TEST_CASE("render still clears when face colors are empty") {
-    elora::Engine engine{"test", 640, 480, 4, 4};
+    elora::Engine engine{"test", 160, 120};
     engine.init();
     engine.put_pixel(0, 0, 0xffffff);
     const elora::Mesh cube = elora::make_cube();
@@ -33,7 +33,7 @@ TEST_CASE("render still clears when face colors are empty") {
 }
 
 TEST_CASE("render hides a farther triangle behind a nearer one") {
-    elora::Engine engine{"test", 640, 480, 4, 4};
+    elora::Engine engine{"test", 160, 120};
     engine.init();
     elora::Mesh mesh;
     mesh.add_vertex({-1.5f, -1.5f, 0});
@@ -51,7 +51,7 @@ TEST_CASE("render hides a farther triangle behind a nearer one") {
 }
 
 TEST_CASE("update rasterizes the mesh then draws the FPS overlay") {
-    elora::Engine engine{"test", 640, 480, 4, 4};
+    elora::Engine engine{"test", 160, 120};
     engine.init();
     const elora::Mesh cube = elora::make_cube();
     const elora::Camera camera{{0, 0, 3}, {0, 0, 0}, {0, 1, 0}, 60.0f};
@@ -62,7 +62,7 @@ TEST_CASE("update rasterizes the mesh then draws the FPS overlay") {
 }
 
 TEST_CASE("render shades a face facing the light brighter than one facing away") {
-    elora::Engine engine{"test", 640, 480, 4, 4};
+    elora::Engine engine{"test", 160, 120};
     engine.init();
     elora::Mesh mesh;
     mesh.add_vertex({-1.5f, -1.5f, 0});
@@ -80,7 +80,7 @@ TEST_CASE("render shades a face facing the light brighter than one facing away")
 }
 
 TEST_CASE("render default light darkens a cube face that is not head-on") {
-    elora::Engine engine{"test", 640, 480, 4, 4};
+    elora::Engine engine{"test", 160, 120};
     engine.init();
     const elora::Mesh cube = elora::make_cube();
     const elora::Camera camera{{0, 0, 3}, {0, 0, 0}, {0, 1, 0}, 60.0f};
@@ -92,7 +92,7 @@ TEST_CASE("render default light darkens a cube face that is not head-on") {
 }
 
 TEST_CASE("render wireframe leaves the interior of a cube unfilled") {
-    elora::Engine engine{"test", 640, 480, 4, 4};
+    elora::Engine engine{"test", 160, 120};
     engine.init();
     const elora::Mesh cube = elora::make_cube();
     const elora::Camera camera{{0, 0, 3}, {0, 0, 0}, {0, 1, 0}, 60.0f};

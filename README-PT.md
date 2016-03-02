@@ -5,9 +5,9 @@ Engine 3D em C++14 na CPU — desenha num back buffer e só então apresenta num
 ## Destaques
 
 - Inicia e encerra `elora::Engine`
-- A aplicação informa o nome, o tamanho da janela e o tamanho do pixel (o demo incluso usa 3D Demo em 1024x768)
+- A aplicação informa o nome e o tamanho da janela (o demo incluso usa 3D Demo em 1024x768)
 - O título da janela inclui a resolução, por exemplo `3D Demo 1024x768`
-- Desenha num back buffer na CPU (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`, `draw_text`); `present()` copia o buffer escalado para a janela X11
+- Desenha num back buffer na CPU (`clear`, `put_pixel`, `fill_triangle`, `stroke_triangle`, `draw_text`); `present()` copia o buffer 1:1 para a janela X11
 - `Engine::delta_time()` e `Engine::fps()` vêm do tempo real entre frames (sem sleep nem teto de FPS); o movimento da câmera e a rotação da malha usam `dt`
 - `elora::update` monta o quadro no back buffer (malha com profundidade, iluminação Lambert e HUD); `present()` é a única cópia para a janela X11
 - `elora::Vector3D` para posições e direções, com rotações em X, Y e Z

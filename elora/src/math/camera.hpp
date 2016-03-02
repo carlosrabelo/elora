@@ -10,6 +10,8 @@ namespace elora {
 struct ScreenPoint {
     int x{0};
     int y{0};
+    float sx{0};
+    float sy{0};
     float z{0};
 };
 
@@ -67,9 +69,9 @@ public:
         const float ndc_x = (cam_x * f / aspect) / cam_z;
         const float ndc_y = (cam_y * f) / cam_z;
 
-        const int x = static_cast<int>((ndc_x * 0.5f + 0.5f) * static_cast<float>(buffer_width));
-        const int y = static_cast<int>((1.0f - (ndc_y * 0.5f + 0.5f)) * static_cast<float>(buffer_height));
-        return ScreenPoint{x, y, cam_z};
+        const float sx = (ndc_x * 0.5f + 0.5f) * static_cast<float>(buffer_width);
+        const float sy = (1.0f - (ndc_y * 0.5f + 0.5f)) * static_cast<float>(buffer_height);
+        return ScreenPoint{static_cast<int>(sx), static_cast<int>(sy), sx, sy, cam_z};
     }
 
 private:
