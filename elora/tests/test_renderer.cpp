@@ -50,6 +50,24 @@ TEST_CASE("render hides a farther triangle behind a nearer one") {
     REQUIRE(engine.pixel(80, 60) == 0x00ff00);
 }
 
+TEST_CASE("render hides a farther triangle even when it is submitted first") {
+    elora::Engine engine{"test", 160, 120};
+    engine.init();
+    elora::Mesh mesh;
+    mesh.add_vertex({-0.3f, -0.3f, 0.8f});
+    mesh.add_vertex({0.3f, -0.3f, 0.8f});
+    mesh.add_vertex({0, 0.3f, 0.8f});
+    mesh.add_triangle(0, 1, 2);
+    mesh.add_vertex({-1.5f, -1.5f, 0});
+    mesh.add_vertex({1.5f, -1.5f, 0});
+    mesh.add_vertex({0, 1.5f, 0});
+    mesh.add_triangle(3, 4, 5);
+    const elora::Camera camera{{0, 0, 3}, {0, 0, 0}, {0, 1, 0}, 60.0f};
+    const std::uint32_t colors[] = {0x00ff00, 0xff0000};
+    elora::render(engine, mesh, camera, 0, 0, 0, colors, elora::DrawMode::Solid, 0x000000, 0xc8c8d0, kUnlit);
+    REQUIRE(engine.pixel(80, 60) == 0x00ff00);
+}
+
 TEST_CASE("update rasterizes the mesh then draws the FPS overlay") {
     elora::Engine engine{"test", 160, 120};
     engine.init();

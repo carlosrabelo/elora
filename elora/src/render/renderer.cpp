@@ -3,6 +3,7 @@
 #include <render/pipeline.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <limits>
@@ -11,7 +12,7 @@
 namespace elora {
 namespace {
 
-int edge(int ax, int ay, int bx, int by, int px, int py) {
+float edge(float ax, float ay, float bx, float by, float px, float py) {
     return (bx - ax) * (py - ay) - (by - ay) * (px - ax);
 }
 
@@ -21,33 +22,38 @@ std::size_t pixel_index(int x, int y, int buffer_width) {
 
 void fill_triangle(Engine& engine, std::vector<float>& depth, int bw, int bh, const ScreenTriangle& triangle,
                    std::uint32_t color, bool write_color) {
-    const int area = edge(triangle.v0.x, triangle.v0.y, triangle.v1.x, triangle.v1.y, triangle.v2.x,
-                          triangle.v2.y);
-    if (area == 0) {
+    const float x0 = triangle.v0.sx;
+    const float y0 = triangle.v0.sy;
+    const float x1 = triangle.v1.sx;
+    const float y1 = triangle.v1.sy;
+    const float x2 = triangle.v2.sx;
+    const float y2 = triangle.v2.sy;
+    const float area = edge(x0, y0, x1, y1, x2, y2);
+    if (std::fabs(area) < 1.0e-6f) {
         return;
     }
 
-    const int min_x = std::max(0, std::min(triangle.v0.x, std::min(triangle.v1.x, triangle.v2.x)));
-    const int min_y = std::max(0, std::min(triangle.v0.y, std::min(triangle.v1.y, triangle.v2.y)));
-    const int max_x = std::min(bw - 1, std::max(triangle.v0.x, std::max(triangle.v1.x, triangle.v2.x)));
-    const int max_y = std::min(bh - 1, std::max(triangle.v0.y, std::max(triangle.v1.y, triangle.v2.y)));
-    const float inv_area = 1.0f / static_cast<float>(area);
+    const int min_x = std::max(0, static_cast<int>(std::floor(std::min(x0, std::min(x1, x2)))));
+    const int min_y = std::max(0, static_cast<int>(std::floor(std::min(y0, std::min(y1, y2)))));
+    const int max_x = std::min(bw - 1, static_cast<int>(std::ceil(std::max(x0, std::max(x1, x2)))));
+    const int max_y = std::min(bh - 1, static_cast<int>(std::ceil(std::max(y0, std::max(y1, y2)))));
+    const float inv_area = 1.0f / area;
 
     for (int y = min_y; y <= max_y; ++y) {
         for (int x = min_x; x <= max_x; ++x) {
-            const int w0 = edge(triangle.v1.x, triangle.v1.y, triangle.v2.x, triangle.v2.y, x, y);
-            const int w1 = edge(triangle.v2.x, triangle.v2.y, triangle.v0.x, triangle.v0.y, x, y);
-            const int w2 = edge(triangle.v0.x, triangle.v0.y, triangle.v1.x, triangle.v1.y, x, y);
-            const bool inside = (area > 0) ? (w0 >= 0 && w1 >= 0 && w2 >= 0)
-                                           : (w0 <= 0 && w1 <= 0 && w2 <= 0);
+            const float px = static_cast<float>(x) + 0.5f;
+            const float py = static_cast<float>(y) + 0.5f;
+            const float w0 = edge(x1, y1, x2, y2, px, py);
+            const float w1 = edge(x2, y2, x0, y0, px, py);
+            const float w2 = edge(x0, y0, x1, y1, px, py);
+            const bool inside = (area > 0.0f) ? (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f)
+                                              : (w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f);
             if (!inside) {
                 continue;
             }
-            const float z = (static_cast<float>(w0) * triangle.v0.z + static_cast<float>(w1) * triangle.v1.z +
-                             static_cast<float>(w2) * triangle.v2.z) *
-                            inv_area;
+            const float z = (w0 * triangle.v0.z + w1 * triangle.v1.z + w2 * triangle.v2.z) * inv_area;
             const auto index = pixel_index(x, y, bw);
-            if (z > depth[index] + 1.0e-3f) {
+            if (z >= depth[index]) {
                 continue;
             }
             depth[index] = z;
@@ -145,11 +151,15 @@ void render(Engine& engine, const Mesh& mesh, const Camera& camera, float angle_
 
     std::vector<float> depth(static_cast<std::size_t>(bw) * static_cast<std::size_t>(bh),
                              std::numeric_limits<float>::infinity());
-    std::vector<ScreenTriangle> visible;
-    if (mode == DrawMode::Wireframe) {
-        visible.reserve(mesh.triangles.size());
-    }
     const bool write_color = mode == DrawMode::Solid && !face_colors.empty();
+
+    struct PreparedFace {
+        ScreenTriangle screen;
+        std::uint32_t color;
+        float depth_key;
+    };
+    std::vector<PreparedFace> faces;
+    faces.reserve(mesh.triangles.size());
 
     for (std::size_t i = 0; i < mesh.triangles.size(); ++i) {
         const auto screen = transform_and_project(mesh, mesh.triangles[i], angle_x, angle_y, angle_z, camera,
@@ -162,14 +172,20 @@ void render(Engine& engine, const Mesh& mesh, const Camera& camera, float angle_
             const Vector3D normal = rotated_face_normal(mesh, mesh.triangles[i], angle_x, angle_y, angle_z);
             color = shade_color(color, lambert(normal, light));
         }
-        fill_triangle(engine, depth, bw, bh, *screen, color, write_color);
-        if (mode == DrawMode::Wireframe) {
-            visible.push_back(*screen);
-        }
+        const float depth_key = (screen->v0.z + screen->v1.z + screen->v2.z) * (1.0f / 3.0f);
+        faces.push_back({*screen, color, depth_key});
+    }
+
+    std::sort(faces.begin(), faces.end(), [](const PreparedFace& a, const PreparedFace& b) {
+        return a.depth_key < b.depth_key;
+    });
+
+    for (const auto& face : faces) {
+        fill_triangle(engine, depth, bw, bh, face.screen, face.color, write_color);
     }
     if (mode == DrawMode::Wireframe) {
-        for (const auto& triangle : visible) {
-            stroke_triangle(engine, depth, bw, bh, triangle, stroke_color);
+        for (const auto& face : faces) {
+            stroke_triangle(engine, depth, bw, bh, face.screen, stroke_color);
         }
     }
 }

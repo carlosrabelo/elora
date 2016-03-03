@@ -20,6 +20,14 @@ TEST_CASE("rotated_face_normal of the cube +Z face points forward") {
     REQUIRE(n.z == Approx(1).margin(0.0001f));
 }
 
+TEST_CASE("is_back_facing is false when the normal points at the eye") {
+    REQUIRE_FALSE(elora::is_back_facing({-1, -1, 1}, {1, -1, 1}, {0, 1, 1}, {0, 0, 3}));
+}
+
+TEST_CASE("is_back_facing is true when the normal points away from the eye") {
+    REQUIRE(elora::is_back_facing({-1, -1, 1}, {1, -1, 1}, {0, 1, 1}, {0, 0, -3}));
+}
+
 TEST_CASE("project_triangle keeps a front-facing cube face") {
     const elora::Mesh cube = elora::make_cube();
     const elora::Camera camera{{0, 0, 3}, {0, 0, 0}, {0, 1, 0}, 60.0f};

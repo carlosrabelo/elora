@@ -24,6 +24,13 @@ inline float screen_area(float x0, float y0, float x1, float y1, float x2, float
     return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
 }
 
+inline bool is_back_facing(const Vector3D& p0, const Vector3D& p1, const Vector3D& p2,
+                           const Vector3D& eye) {
+    const Vector3D normal = (p1 - p0).cross(p2 - p0);
+    const Vector3D centroid = (p0 + p1 + p2) * (1.0f / 3.0f);
+    return normal.dot(eye - centroid) <= 0.0f;
+}
+
 inline bool is_off_screen(const ScreenTriangle& triangle, int buffer_width, int buffer_height) {
     const int min_x = std::min(triangle.v0.x, std::min(triangle.v1.x, triangle.v2.x));
     const int max_x = std::max(triangle.v0.x, std::max(triangle.v1.x, triangle.v2.x));
@@ -41,7 +48,7 @@ inline Optional<ScreenTriangle> project_triangle(const Vector3D& p0, const Vecto
     if (!s0 || !s1 || !s2) {
         return {};
     }
-    if (screen_area(s0->sx, s0->sy, s1->sx, s1->sy, s2->sx, s2->sy) > 1.0e-3f) {
+    if (is_back_facing(p0, p1, p2, camera.position())) {
         return {};
     }
     const ScreenTriangle screen{*s0, *s1, *s2};
